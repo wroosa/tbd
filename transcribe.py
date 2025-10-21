@@ -1,8 +1,6 @@
-from pathlib import Path
 from openai import OpenAI
 from dotenv import load_dotenv
 from format_transcript import format_transcript
-import json
 import os
 
 
