@@ -1,37 +1,73 @@
-from openai import OpenAI
-from dotenv import load_dotenv
-from format_transcript import format_transcript
-import os
+from pydub import AudioSegment
+from pathlib import Path
+from constants import (
+    SUPPORTED_AUDIO_FILE_TYPES,
+    MB_BYTES,
+    FILE_SIZE_LIMIT,
+    BATCH_SIZE_LIMIT,
+    BATCH_TIME_SIZE,
+)
+from transcribe_audio import transcribe_audio
+from tempfile import TemporaryDirectory
 
 
-def transcribe_audio(audio_path, speakers_info):
-    load_dotenv()
-    api_key = os.getenv("OPEN_API_KEY")
-    client = OpenAI(api_key=api_key)
+def transcribe(audio_path, speakers_info):
 
-    prompt = """
-        This is a dungeons and dragons session with 3 players matt playing saladin, walter playing perun and nick playing ako. The dungeon master is isaac who will be speakign as different npcs. Each audio segement is from one continuous session.
-    """
+    path = Path(audio_path).resolve()
+    extension = path.suffix
+    audio_format = extension.strip(".")
+    size_MB = get_file_size_MB(path)
+    name = path.stem
 
-    with audio_path.open("rb") as audio_file:
-        response = client.audio.transcriptions.create(
-            file=audio_file,
-            model="gpt-4o-transcribe-diarize",
-            chunking_strategy="auto",
-            extra_body=speakers_info,
-            language="en",
-            response_format="diarized_json",
+    if not path.is_file():
+        raise Exception(f"Error: Path to audio file {path} is not a file")
+
+    if extension not in SUPPORTED_AUDIO_FILE_TYPES:
+        raise Exception(
+            f"Error: Audio file:{path} is an unsupported type {audio_format}"
         )
-    json_dict = response.model_dump()
 
-    # LOAD EXAMPLE FILE TO BYPASS QUERY
-    # ex_file = Path("response_example.json").resolve()
-    # with ex_file.open("r", encoding="utf-8") as f:
-    #     json_dict = json.load(f)
+    if size_MB > FILE_SIZE_LIMIT:
+        raise Exception(
+            f"Error: Audio file:{path} is above the file size limit of {FILE_SIZE_LIMIT}MB"
+        )
 
-    # WRITE TO AN EXAMPLE FILE
-    # ex_file.write_text(data)
+    # If the file is above the batch size limit split it and stitch the results for each segement otherwise just transcribe once.
+    if size_MB > BATCH_SIZE_LIMIT:
+        transcript_chunks = []
+        audio = AudioSegment.from_file(path, format=audio_format)
+        chunks = audio[::BATCH_TIME_SIZE]
+        num_chunks = len(chunks)
 
-    transcript = format_transcript(json_dict)
+        # Create a temportary directory for the chunked audio files
+        with TemporaryDirectory(prefix="transcription_") as tmpdir:
+            temp_folder_path = Path(tmpdir)
+            print(f"Temp folder: {tmpdir}")
+
+            for i, chunk in enumerate(chunks):
+                temp_file_name = f"{name}-temp{i}.{audio_format}"
+                temp_file_path = temp_folder_path / temp_file_name
+                chunk.export(temp_file_path, format=audio_format)
+                print(f"Transcribing chunk {i}/{num_chunks} temp_file:{temp_file_path}")
+
+                with open(temp_file_path, "rb") as f:
+                    # TODO: Implement further batch splitting for large sizes
+                    # if get_file_size_MB(temp_name) > BATCH_SIZE_LIMIT:
+                    chunk_transcript = transcribe_audio(f, speakers_info)
+                    transcript_chunks.append(chunk_transcript)
+
+                # Delete the temporary file after transcription
+                temp_file_path.unlink(missing_ok=True)
+
+        # Merge transcript chunks into one transcript
+        transcript = "\n".join(transcript_chunks)
+    else:
+        transcript = transcribe_audio(path, speakers_info)
 
     return transcript
+
+
+def get_file_size_MB(path):
+    path = Path(path)
+    size_bytes = path.stat().st_size
+    return size_bytes / MB_BYTES

@@ -1,8 +1,9 @@
 from pathlib import Path
 from argparse import ArgumentParser
-from transcribe import transcribe_audio
+from transcribe_audio import transcribe_audio
 from write_transcription import write_transcription
 from create_speakers import create_speakers
+from transcribe import transcribe
 
 
 def main():
@@ -17,7 +18,7 @@ def main():
 
     speakers_info = create_speakers(samples_path)
 
-    text = transcribe_audio(audio_path, speakers_info)
+    text = transcribe(audio_path, speakers_info)
 
     directory = Path("transcriptions").resolve()
     name = f"{audio_path.stem}_transcription.txt"
