@@ -1,9 +1,10 @@
 from pathlib import Path
 from argparse import ArgumentParser
 from transcribe_audio import transcribe_audio
-from write_transcription import write_transcription
+from write_transcription import write_transcription, write_summary
 from create_speakers import create_speakers
 from transcribe import transcribe
+from summarize_transcript import generate_summary
 
 
 def main():
@@ -20,10 +21,15 @@ def main():
 
     text = transcribe(audio_path, speakers_info)
 
-    directory = Path("transcriptions").resolve()
+    transciption_directory = Path("transcriptions").resolve()
     name = f"{audio_path.stem}_transcription.txt"
-    write_transcription(text, directory, name, overwrite=True)
+    write_transcription(text, transciption_directory, name, overwrite=True)
 
+    summary = generate_summary(text)
+
+    summary_directory = Path("summaries").resolve()
+    name = f"{audio_path.stem}_summary.txt"
+    write_summary(summary, summary_directory, name, overwrite=True)
 
 if __name__ == "__main__":
     main()

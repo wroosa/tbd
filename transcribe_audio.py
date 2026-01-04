@@ -1,5 +1,6 @@
 from openai import OpenAI
 from dotenv import load_dotenv
+from get_openai_client import get_openai_client
 from format_transcript import format_transcript
 from pathlib import Path
 import json
@@ -7,10 +8,8 @@ import os
 
 
 def transcribe_audio(audio_file, speakers_info):
-    load_dotenv()
-    api_key = os.getenv("OPEN_API_KEY")
-    client = OpenAI(api_key=api_key)
-
+    
+    client = get_openai_client()
     prompt = """
         This is a dungeons and dragons session with 3 players matt playing saladin, walter playing perun and nick playing ako. The dungeon master is isaac who will be speakign as different npcs. Each audio segement is from one continuous session.
     """

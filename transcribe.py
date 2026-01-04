@@ -37,7 +37,6 @@ def transcribe(audio_path, speakers_info):
         transcript_chunks = []
         audio = AudioSegment.from_file(path, format=audio_format)
         chunks = audio[::BATCH_TIME_SIZE]
-        num_chunks = len(chunks)
 
         # Create a temportary directory for the chunked audio files
         with TemporaryDirectory(prefix="transcription_") as tmpdir:
@@ -48,7 +47,7 @@ def transcribe(audio_path, speakers_info):
                 temp_file_name = f"{name}-temp{i}.{audio_format}"
                 temp_file_path = temp_folder_path / temp_file_name
                 chunk.export(temp_file_path, format=audio_format)
-                print(f"Transcribing chunk {i}/{num_chunks} temp_file:{temp_file_path}")
+                print(f"Transcribing chunk {i} temp_file:{temp_file_path}")
 
                 with open(temp_file_path, "rb") as f:
                     # TODO: Implement further batch splitting for large sizes
@@ -62,6 +61,7 @@ def transcribe(audio_path, speakers_info):
         # Merge transcript chunks into one transcript
         transcript = "\n".join(transcript_chunks)
     else:
+        print(f"Transcribing whole file. File size below batching limit")
         transcript = transcribe_audio(path, speakers_info)
 
     return transcript
