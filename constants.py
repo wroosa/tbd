@@ -20,6 +20,13 @@ SUPPORTED_AUDIO_MIME_TYPES = {
     ".wav": "audio/wav",
     ".webm": "audio/webm",
 }
+
+SUPPORTED_CONTEXT_FILE_TYPES = (
+    ".pdf",
+    ".txt",
+)
+
+
 SPEAKER_SAMPLE_LIMIT = 10.0  # Seconds
 MB_BYTES = 1048576  # Bytes
 BATCH_SIZE_LIMIT = 20.0  # Megabytes

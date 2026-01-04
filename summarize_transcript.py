@@ -9,12 +9,13 @@ import tiktoken
 def generate_summary(transcript):
     client = get_openai_client()
     messages = [transcript]
-    generate(client, messages)
+
+    return generate(client, messages)
 
 
 def generate(client, messages):
     system_prompt = """
-        You are an expert and experienced dungeon master who is creating a session summary.
+        You are an expert and experienced dungeon master who is creating a session summary based on a audio transcript that is provided. You will also have all previously generated session summaries to reference and some documents that contain context about the world and things within it. Using all of this information create a session summary with chronological events and key moments/decisions as well as characters we met.
     """
     response = client.responses.create(
         model="gpt-5",

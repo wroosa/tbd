@@ -16,6 +16,8 @@ def main():
     args = parser.parse_args()
     audio_path = Path(args.audio_file).resolve()
     samples_path = Path(args.speaker_samples).resolve()
+    context_path = Path("context_files")
+    summaries_path = Path("summaries")
 
     speakers_info = create_speakers(samples_path)
 
@@ -30,6 +32,7 @@ def main():
     summary_directory = Path("summaries").resolve()
     name = f"{audio_path.stem}_summary.txt"
     write_summary(summary, summary_directory, name, overwrite=True)
+
 
 if __name__ == "__main__":
     main()
