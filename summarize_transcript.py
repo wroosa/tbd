@@ -5,10 +5,12 @@ from constants import CHUNK_TOKEN_MAX
 import re
 import tiktoken
 
+
 def generate_summary(transcript):
     client = get_openai_client()
-    messages = []
+    messages = [transcript]
     generate(client, messages)
+
 
 def generate(client, messages):
     system_prompt = """
@@ -16,10 +18,11 @@ def generate(client, messages):
     """
     response = client.responses.create(
         model="gpt-5",
-        input=messages,
-        system_prompt=system_prompt,
+        input=messages[0],
+        instructions=system_prompt,
     )
     return response.output_text
+
 
 ###### Unused code for splitting transcript into chunks based on token count ######
 
