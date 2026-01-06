@@ -21,7 +21,7 @@ SUPPORTED_AUDIO_MIME_TYPES = {
     ".webm": "audio/webm",
 }
 
-SUPPORTED_CONTEXT_FILE_TYPES = (
+SUPPORTED_FILE_TYPES = (
     ".pdf",
     ".txt",
 )

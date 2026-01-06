@@ -6,23 +6,40 @@ import re
 import tiktoken
 
 
-def generate_summary(transcript):
+def generate_summary(transcript, context_files, previous_summaries):
     client = get_openai_client()
-    messages = [transcript]
+    model_input = create_input(transcript, context_files + previous_summaries)
 
-    return generate(client, messages)
+    return generate(client, model_input)
 
 
-def generate(client, messages):
+def generate(client, model_input):
     system_prompt = """
         You are an expert and experienced dungeon master who is creating a session summary based on a audio transcript that is provided. You will also have all previously generated session summaries to reference and some documents that contain context about the world and things within it. Using all of this information create a session summary with chronological events and key moments/decisions as well as characters we met.
     """
     response = client.responses.create(
         model="gpt-5",
-        input=messages[0],
+        input=model_input,
         instructions=system_prompt,
     )
     return response.output_text
+
+
+def create_input(transcript, files):
+
+    content = [
+        {
+            "type": "input_text",
+            "text": transcript,
+        }
+    ]
+
+    for file in files:
+        content.append({"type": "input_file", "file_id": file.id})
+
+    return [
+        {"role": "user", "content": content},
+    ]
 
 
 ###### Unused code for splitting transcript into chunks based on token count ######

@@ -8,7 +8,7 @@ import os
 
 
 def transcribe_audio(audio_file, speakers_info):
-    
+
     client = get_openai_client()
     prompt = """
         This is a dungeons and dragons session with 3 players matt playing saladin, walter playing perun and nick playing ako. The dungeon master is isaac who will be speakign as different npcs. Each audio segement is from one continuous session.
