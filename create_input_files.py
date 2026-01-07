@@ -9,6 +9,12 @@ def create_input_files_from_dir(path):
         raise Exception(f"Error: Path to input files ({path}) is not a directory")
 
     client = get_openai_client()
+
+    # Create a dictionary of existing files keyed by the filename
+    existing_files = {}
+    for f in client.files.list()["data"]:
+        existing_files[f["filename"]] = f
+
     files = Path(path).iterdir()
     file_objects = []
     for file in files:
@@ -22,9 +28,15 @@ def create_input_files_from_dir(path):
                 )
             # TODO: Add check for file size limits
 
-            file_objects.append(
-                client.files.create(file=open(file, "rb"), purpose="user_data")
-            )
+            # If the file exists with the same name then grab the file object otherwise create it
+            file_obj = existing_files.get(file.name, None)
+
+            if file_obj:
+                file_objects.append(file_obj)
+            else:
+                file_objects.append(
+                    client.files.create(file=open(file, "rb"), purpose="user_data")
+                )
 
     if file_objects == []:
         print(f"Warning: No input files were found in directory: {path}")

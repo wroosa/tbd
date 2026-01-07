@@ -23,19 +23,22 @@ def main():
     context_files = create_input_files_from_dir(context_path)
     summary_files = create_input_files_from_dir(summaries_path)
 
-    speakers_info = create_speakers(samples_path)
+    # speakers_info = create_speakers(samples_path)
 
-    text = transcribe(audio_path, speakers_info)
+    # text = transcribe(audio_path, speakers_info)
 
-    transciption_directory = Path("transcriptions").resolve()
-    name = f"{audio_path.stem}_transcription.txt"
-    write_transcription(text, transciption_directory, name, overwrite=True)
+    ##### Get text from file to bypass transcription
+    with open("transcriptions/full_transcription.txt", "r") as file:
+        text = file.read()
 
-    # summary = generate_summary(text)
+    # transciption_directory = Path("transcriptions").resolve()
+    # name = f"{audio_path.stem}_transcription.txt"
+    # write_transcription(text, transciption_directory, name, overwrite=True)
+    summary = generate_summary(text, context_files, summary_files)
 
-    # summary_directory = Path("summaries").resolve()
-    # name = f"{audio_path.stem}_summary.txt"
-    # write_summary(summary, summary_directory, name, overwrite=True)
+    summary_directory = Path("session_summaries").resolve()
+    name = f"{audio_path.stem}_summary.txt"
+    write_summary(summary, summary_directory, name, overwrite=True)
 
 
 if __name__ == "__main__":
