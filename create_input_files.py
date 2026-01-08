@@ -15,6 +15,7 @@ def create_input_files_from_dir(path):
     for f in client.files.list()["data"]:
         existing_files[f["filename"]] = f
 
+    # Iterate over files in the context_files directory
     files = Path(path).iterdir()
     file_objects = []
     for file in files:
